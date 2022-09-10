@@ -3459,7 +3459,7 @@
     "web3-core-subscriptions" "1.7.5"
     "web3-net" "1.7.5"
 
-"web3-utils@1.7.5":
+"web3-utils@^1.7.5", "web3-utils@1.7.5":
   "integrity" "sha512-9AqNOziQky4wNQadEwEfHiBdOZqopIHzQQVzmvvv6fJwDSMhP+khqmAZC7YTiGjs0MboyZ8tWNivqSO1699XQw=="
   "resolved" "https://registry.npmjs.org/web3-utils/-/web3-utils-1.7.5.tgz"
   "version" "1.7.5"
