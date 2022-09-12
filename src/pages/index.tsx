@@ -16,6 +16,7 @@ import { BuildSpaceV2Owner } from '../constants/address'
 // Getting an abi, use require to fix typescript issue with web3js
 const LearnWeb3DaoABI = require('../abi/learn_web3_dao_abi.json')
 const BuildSpaceV2ABI = require('../abi/build_space_v2_abi.json')
+const ERC721EnumerableABI = require('../abi/erc721_enumerable_abi.json')
 
 // Components
 import Nft from '../components/nft'
@@ -43,7 +44,7 @@ const Home: NextPage = () => {
 		)
 		const ownerLists = await learnWeb3Contract.methods
 			.balanceOfBatch(
-				Array(totalItemsLearnWeb3NFTs).fill(LearnWeb3DaoOwner),
+				Array(totalItemsLearnWeb3NFTs).fill(address),
 				[0, 1, 2, 3]
 			)
 			.call()
@@ -64,6 +65,7 @@ const Home: NextPage = () => {
 	useEffect(() => {
 		if (address) {
 			loadLearnWeb3DaoNFTs()
+			// loadBuildSpaceNfts()
 		}
 	}, [address])
 
@@ -72,7 +74,7 @@ const Home: NextPage = () => {
 
 		// BuildSpaceContract
 		const buildSpaceContract = new web3.eth.Contract(
-			BuildSpaceV2ABI,
+			ERC721EnumerableABI,
 			BuildSpaceV2Address
 		)
 		console.log('buildSpaceContract', buildSpaceContract)
@@ -83,21 +85,24 @@ const Home: NextPage = () => {
 		console.log('buildSpaceBalance', buildSpaceBalance)
 
 		// get totalsupply by binarySearch => max at index 21812
-		const ownerOf = await buildSpaceContract.methods.ownerOf(21812).call()
-		console.log('ownerOf', ownerOf)
+		// const ownerOf = await buildSpaceContract.methods.ownerOf(21812).call()
+		// console.log('ownerOf', ownerOf)
 
-		const baseURI = await buildSpaceContract.methods.tokenURI(10000).call()
-		console.log('baseURI', baseURI)
+		// const baseURI = await buildSpaceContract.methods.tokenURI(10000).call()
+		// console.log('baseURI', baseURI)
 
-		const claimed = await buildSpaceContract.methods
-			.claimed(BuildSpaceV2Owner, 'CHc4f6a1ec-dfa6-4679-9ad3-59301b7f2bee')
-			.call()
-		console.log('claimed', claimed)
+		// const test = await buildSpaceContract.methods.totalSupply().call()
+		// console.log('test', test)
 
-		const tokenURI = await buildSpaceContract.methods.tokenURI(claimed).call()
-		console.log('tokenURI', tokenURI)
+		// const claimed = await buildSpaceContract.methods
+		// 	.claimed(BuildSpaceV2Owner, 'CHc4f6a1ec-dfa6-4679-9ad3-59301b7f2bee')
+		// 	.call()
+		// console.log('claimed', claimed)
 
-		console.log('start calling')
+		// const tokenURI = await buildSpaceContract.methods.tokenURI(claimed).call()
+		// console.log('tokenURI', tokenURI)
+
+		// console.log('start calling')
 		for (let i = 0; i < 20000; i++) {
 			try {
 				const ownerOf = await buildSpaceContract.methods.ownerOf(i).call()
