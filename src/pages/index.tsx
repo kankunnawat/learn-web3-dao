@@ -13,7 +13,7 @@ import { BuildSpaceV2Address } from '../constants/address'
 import { LearnWeb3DaoOwner } from '../constants/address'
 import { BuildSpaceV2Owner } from '../constants/address'
 
-// Getting an abi, use require to fix typescript issue
+// Getting an abi, use require to fix typescript issue with web3js
 const LearnWeb3DaoABI = require('../abi/learn_web3_dao_abi.json')
 const BuildSpaceV2ABI = require('../abi/build_space_v2_abi.json')
 
@@ -110,7 +110,7 @@ const Home: NextPage = () => {
 		console.log('finish calling')
 	}
 
-	const friendlyWalleName = (address: String) => {
+	const friendlyWalletName = (address: String) => {
 		const addressLength = address.length
 		return `${address.substring(0, 5)}...${address.substring(
 			addressLength - 5
@@ -141,12 +141,12 @@ const Home: NextPage = () => {
 
 					{address && (
 						<h3 className='m-2 text-sm text-blue-400'>
-							Wallet Address: {friendlyWalleName(address)}
+							Wallet Address: {friendlyWalletName(address)}
 						</h3>
 					)}
 				</section>
 				{/* Display nfts user owns */}
-				<Nft nftAmountOwnByUser={nftAmountOwnByUser} />
+				{address && <Nft nftAmountOwnByUser={nftAmountOwnByUser} />}
 			</main>
 		</div>
 	)
