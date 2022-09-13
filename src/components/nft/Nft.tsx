@@ -19,7 +19,7 @@ const Nft: React.FC<Props> = ({ nftAmountOwnByUser }) => {
 
 	const mapAmountToNft = () => {
 		let values: RawNftMetadata[] = []
-		Object.entries(learnWeb3NFTsData).map(([key, value]) => {
+		Object.values(learnWeb3NFTsData).map((value) => {
 			values.push(value)
 		})
 		let result: NftMetadata[] = []
@@ -43,7 +43,7 @@ const Nft: React.FC<Props> = ({ nftAmountOwnByUser }) => {
 		return <HashLoader cssOverride={loaderCss} />
 	}
 
-	if (isEmpty) {
+	if (isEmpty || nftAmountOwnByUser.length === 0) {
 		return <div>You don't own any nfts</div>
 	}
 
