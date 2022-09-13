@@ -2,6 +2,7 @@ import learnWeb3NFTsData from '../../constants/learnWeb3Data'
 import Image from 'next/image'
 import { useEffect, useState, CSSProperties } from 'react'
 import { NftMetadata, RawNftMetadata } from '../../../typings'
+
 import HashLoader from 'react-spinners/HashLoader'
 
 interface Props {
@@ -39,16 +40,15 @@ const Nft: React.FC<Props> = ({ nftAmountOwnByUser }) => {
 		mapAmountToNft()
 	}, [nftAmountOwnByUser])
 
-	if (!result) {
-		return <HashLoader cssOverride={loaderCss} />
-	}
-
 	if (isEmpty || nftAmountOwnByUser.length === 0) {
-		return <div>You don't own any nfts</div>
+		return <div>You don't own any LearnWeb3Dao nfts</div>
 	}
 
 	return (
 		<div className='bg-slate-100 p-10 shadow-xl shadow-rose-400/20'>
+			<h1 className='text-3xl font-bold lg:text-5xl lg:font-extrabold pb-10'>
+				LearnWeb3Dao Collection
+			</h1>
 			<div className='grid space-x-3 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4'>
 				{result.map((item, index) => {
 					if (item.amount == 0) {

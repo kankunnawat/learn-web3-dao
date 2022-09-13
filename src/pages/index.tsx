@@ -2,8 +2,8 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 
 import { useState, useEffect } from 'react'
-import { Contract, ethers, providers } from 'ethers'
 import Web3 from 'web3'
+import { Alchemy, Network, OwnedNft } from 'alchemy-sdk'
 
 // Contract Address
 import { LearnWeb3DaoAddress } from '../constants/address'
@@ -16,24 +16,48 @@ import { BuildSpaceV2Owner } from '../constants/address'
 // Getting an abi, use require to fix typescript issue with web3js
 const LearnWeb3DaoABI = require('../abi/learn_web3_dao_abi.json')
 const BuildSpaceV2ABI = require('../abi/build_space_v2_abi.json')
-const ERC721EnumerableABI = require('../abi/erc721_enumerable_abi.json')
+const ERC721EnumerableABI = require('../abi/erc721_abi.json')
 
 // Components
 import Nft from '../components/nft'
+import NftBuildSpace from 'components/NftBuildSpace'
 
 // Thirdweb
 import { useAddress, useDisconnect, useMetamask } from '@thirdweb-dev/react'
 
 const Home: NextPage = () => {
+	// State for learnWeb3Dao nft
 	const [nftAmountOwnByUser, setNftAmountOwnByUser] = useState<number[]>([])
 	const totalItemsLearnWeb3NFTs = 4 // learnWeb3Dao nft collection has only 4 items
-	var ownerOfLists: string[] = []
 
 	// Auth with thirdweb
 	const connectWithMetamask = useMetamask()
 	const address = useAddress()
 	const disconnect = useDisconnect()
+	// Alchemy
+	const [nfts, setNfts] = useState<OwnedNft[]>()
 
+	// Alchemy config
+	const config = {
+		apiKey: process.env.ALCHEMY_API_KEY,
+		network: Network.MATIC_MAINNET,
+	}
+	const alchemy = new Alchemy(config)
+
+	// Alchemy approach for fetching Nfts data from BuildSpaceV2 collection
+	const loadBuildspaceNfts = async () => {
+		if (address) {
+			const nfts = await alchemy.nft.getNftsForOwner(BuildSpaceV2Owner)
+
+			const filteredNfts = nfts.ownedNfts.filter((nft) => {
+				return nft.contract.address === BuildSpaceV2Address.toLowerCase()
+			})
+
+			setNfts(filteredNfts)
+		}
+	}
+
+	// Native Approach to get Nfts data from LearnWeb3Dao collection
 	const loadLearnWeb3DaoNFTs = async () => {
 		const web3 = new Web3(window.ethereum)
 
@@ -44,76 +68,20 @@ const Home: NextPage = () => {
 		)
 		const ownerLists = await learnWeb3Contract.methods
 			.balanceOfBatch(
-				Array(totalItemsLearnWeb3NFTs).fill(address),
+				Array(totalItemsLearnWeb3NFTs).fill(LearnWeb3DaoOwner),
 				[0, 1, 2, 3]
 			)
 			.call()
 		setNftAmountOwnByUser(ownerLists)
 	}
 
-	// ERC721Enumerable
-	// const getMetaData = async (balance: number, contract: any) => {
-	// 	for (let i = 0; i < balance; i++) {
-	// 		const tokenId = await contract.methods
-	// 			.tokenOfOwnerByIndex(address, i)
-	// 			.call()
-	// 		console.log('tokenId', tokenId)
-	// 	}
-	// }
-
 	// Load nft when log in
 	useEffect(() => {
 		if (address) {
 			loadLearnWeb3DaoNFTs()
-			// loadBuildSpaceNfts()
+			loadBuildspaceNfts()
 		}
 	}, [address])
-
-	const loadBuildSpaceNfts = async () => {
-		const web3 = new Web3(window.ethereum)
-
-		// BuildSpaceContract
-		const buildSpaceContract = new web3.eth.Contract(
-			ERC721EnumerableABI,
-			BuildSpaceV2Address
-		)
-		console.log('buildSpaceContract', buildSpaceContract)
-
-		const buildSpaceBalance = await buildSpaceContract.methods
-			.balanceOf(BuildSpaceV2Owner)
-			.call()
-		console.log('buildSpaceBalance', buildSpaceBalance)
-
-		// get totalsupply by binarySearch => max at index 21812
-		// const ownerOf = await buildSpaceContract.methods.ownerOf(21812).call()
-		// console.log('ownerOf', ownerOf)
-
-		// const baseURI = await buildSpaceContract.methods.tokenURI(10000).call()
-		// console.log('baseURI', baseURI)
-
-		// const test = await buildSpaceContract.methods.totalSupply().call()
-		// console.log('test', test)
-
-		// const claimed = await buildSpaceContract.methods
-		// 	.claimed(BuildSpaceV2Owner, 'CHc4f6a1ec-dfa6-4679-9ad3-59301b7f2bee')
-		// 	.call()
-		// console.log('claimed', claimed)
-
-		// const tokenURI = await buildSpaceContract.methods.tokenURI(claimed).call()
-		// console.log('tokenURI', tokenURI)
-
-		// console.log('start calling')
-		for (let i = 0; i < 20000; i++) {
-			try {
-				const ownerOf = await buildSpaceContract.methods.ownerOf(i).call()
-				ownerOfLists.push(ownerOf)
-			} catch (error) {
-				console.log('error', error)
-			}
-		}
-		console.log('ownerOfLists', ownerOfLists)
-		console.log('finish calling')
-	}
 
 	const friendlyWalletName = (address: String) => {
 		const addressLength = address.length
@@ -151,7 +119,10 @@ const Home: NextPage = () => {
 					)}
 				</section>
 				{/* Display nfts user owns */}
-				{address && <Nft nftAmountOwnByUser={nftAmountOwnByUser} />}
+				<section>
+					{address && <Nft nftAmountOwnByUser={nftAmountOwnByUser} />}
+					{address && <NftBuildSpace nfts={nfts} />}
+				</section>
 			</main>
 		</div>
 	)

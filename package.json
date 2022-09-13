@@ -7,6 +7,7 @@
 	},
 	"dependencies": {
 		"@thirdweb-dev/react": "^2.9.7",
+		"alchemy-sdk": "^2.0.4",
 		"ethers": "^5.7.0",
 		"next": "latest",
 		"react": "18.1.0",

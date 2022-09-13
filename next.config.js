@@ -2,6 +2,6 @@
 module.exports = {
 	reactStrictMode: false,
 	images: {
-		domains: ['lh3.googleusercontent.com'],
+		domains: ['lh3.googleusercontent.com', 'tokens.buildspace.so'],
 	},
 }
