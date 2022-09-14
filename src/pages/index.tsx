@@ -21,11 +21,13 @@ const ERC721EnumerableABI = require('../abi/erc721_abi.json')
 // Components
 import Nft from '../components/nft'
 import NftBuildSpace from 'components/NftBuildSpace'
+import HashLoader from 'react-spinners/HashLoader'
 
 // Thirdweb
 import { useAddress, useDisconnect, useMetamask } from '@thirdweb-dev/react'
 
 const Home: NextPage = () => {
+	const [loading, setLoading] = useState<boolean>(false)
 	// State for learnWeb3Dao nft
 	const [nftAmountOwnByUser, setNftAmountOwnByUser] = useState<number[]>([])
 	const totalItemsLearnWeb3NFTs = 4 // learnWeb3Dao nft collection has only 4 items
@@ -46,15 +48,13 @@ const Home: NextPage = () => {
 
 	// Alchemy approach for fetching Nfts data from BuildSpaceV2 collection
 	const loadBuildspaceNfts = async () => {
-		if (address) {
-			const nfts = await alchemy.nft.getNftsForOwner(address)
-
-			const filteredNfts = nfts.ownedNfts.filter((nft) => {
-				return nft.contract.address === BuildSpaceV2Address.toLowerCase()
-			})
-
-			setNfts(filteredNfts)
-		}
+		setLoading(true)
+		const nfts = await alchemy.nft.getNftsForOwner(BuildSpaceV2Owner)
+		const filteredNfts = nfts.ownedNfts.filter((nft) => {
+			return nft.contract.address === BuildSpaceV2Address.toLowerCase()
+		})
+		setNfts(filteredNfts)
+		setLoading(false)
 	}
 
 	// Native Approach to get Nfts data from LearnWeb3Dao collection
@@ -66,13 +66,15 @@ const Home: NextPage = () => {
 			LearnWeb3DaoABI,
 			LearnWeb3DaoAddress
 		)
+		setLoading(true)
 		const ownerLists = await learnWeb3Contract.methods
 			.balanceOfBatch(
-				Array(totalItemsLearnWeb3NFTs).fill(address),
+				Array(totalItemsLearnWeb3NFTs).fill(LearnWeb3DaoOwner),
 				[0, 1, 2, 3]
 			)
 			.call()
 		setNftAmountOwnByUser(ownerLists)
+		setLoading(false)
 	}
 
 	// Load nft when log in
@@ -94,6 +96,14 @@ const Home: NextPage = () => {
 		return (
 			(nfts?.length === 0 || !nfts) &&
 			nftAmountOwnByUser.every((item) => item == 0)
+		)
+	}
+
+	if (loading) {
+		return (
+			<div className='flex h-screen items-center justify-center'>
+				<HashLoader size={150} />
+			</div>
 		)
 	}
 
