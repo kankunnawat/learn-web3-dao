@@ -1,15 +1,8 @@
-import { CSSProperties } from 'react'
 import { OwnedNft } from 'alchemy-sdk'
-import HashLoader from 'react-spinners/HashLoader'
 import Image from 'next/image'
 
 interface Props {
 	nfts: OwnedNft[] | undefined
-}
-
-const loaderCss: CSSProperties = {
-	display: 'block',
-	margin: '0 auto',
 }
 
 const NftBuildSpace: React.FC<Props> = ({ nfts }) => {

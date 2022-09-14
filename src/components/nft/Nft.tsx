@@ -1,17 +1,10 @@
 import learnWeb3NFTsData from '../../constants/learnWeb3Data'
 import Image from 'next/image'
-import { useEffect, useState, CSSProperties } from 'react'
+import { useEffect, useState } from 'react'
 import { NftMetadata, RawNftMetadata } from '../../../typings'
-
-import HashLoader from 'react-spinners/HashLoader'
 
 interface Props {
 	nftAmountOwnByUser: number[]
-}
-
-const loaderCss: CSSProperties = {
-	display: 'block',
-	margin: '0 auto',
 }
 
 const Nft: React.FC<Props> = ({ nftAmountOwnByUser }) => {

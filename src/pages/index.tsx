@@ -3,20 +3,8 @@ import Head from 'next/head'
 
 import { useState, useEffect } from 'react'
 import Web3 from 'web3'
-import { Alchemy, Network, OwnedNft } from 'alchemy-sdk'
-
-// Contract Address
-import { LearnWeb3DaoAddress } from '../constants/address'
-import { BuildSpaceV2Address } from '../constants/address'
-
-//Test Account Address
-import { LearnWeb3DaoOwner } from '../constants/address'
-import { BuildSpaceV2Owner } from '../constants/address'
-
-// Getting an abi, use require to fix typescript issue with web3js
-const LearnWeb3DaoABI = require('../abi/learn_web3_dao_abi.json')
-const BuildSpaceV2ABI = require('../abi/build_space_v2_abi.json')
-const ERC721EnumerableABI = require('../abi/erc721_abi.json')
+import { Alchemy, OwnedNft } from 'alchemy-sdk'
+import { alchemyConfig } from '../../alchemy'
 
 // Components
 import Nft from '../components/nft'
@@ -25,6 +13,17 @@ import HashLoader from 'react-spinners/HashLoader'
 
 // Thirdweb
 import { useAddress, useDisconnect, useMetamask } from '@thirdweb-dev/react'
+
+// Contract Address
+import { LearnWeb3DaoAddress } from '../constants/address'
+import { BuildSpaceV2Address } from '../constants/address'
+//Test Account Address
+import { LearnWeb3DaoOwner } from '../constants/address'
+import { BuildSpaceV2Owner } from '../constants/address'
+// Getting an abi, use require to fix typescript issue with web3js
+const LearnWeb3DaoABI = require('../abi/learn_web3_dao_abi.json')
+
+import { friendlyWalletName, isUserOwnNothing } from '../utlis'
 
 const Home: NextPage = () => {
 	const [loading, setLoading] = useState<boolean>(false)
@@ -38,24 +37,7 @@ const Home: NextPage = () => {
 	const disconnect = useDisconnect()
 	// Alchemy
 	const [nfts, setNfts] = useState<OwnedNft[]>()
-
-	// Alchemy config
-	const config = {
-		apiKey: process.env.ALCHEMY_API_KEY,
-		network: Network.MATIC_MAINNET,
-	}
-	const alchemy = new Alchemy(config)
-
-	// Alchemy approach for fetching Nfts data from BuildSpaceV2 collection
-	const loadBuildspaceNfts = async () => {
-		setLoading(true)
-		const nfts = await alchemy.nft.getNftsForOwner(BuildSpaceV2Owner)
-		const filteredNfts = nfts.ownedNfts.filter((nft) => {
-			return nft.contract.address === BuildSpaceV2Address.toLowerCase()
-		})
-		setNfts(filteredNfts)
-		setLoading(false)
-	}
+	const alchemy = new Alchemy(alchemyConfig)
 
 	// Native Approach to get Nfts data from LearnWeb3Dao collection
 	const loadLearnWeb3DaoNFTs = async () => {
@@ -74,6 +56,19 @@ const Home: NextPage = () => {
 			)
 			.call()
 		setNftAmountOwnByUser(ownerLists)
+		console.log('nftAmountOwnByUser - learnweb3dao', nftAmountOwnByUser)
+		setLoading(false)
+	}
+
+	// Alchemy approach for fetching Nfts data from BuildSpaceV2 collection
+	const loadBuildspaceNfts = async () => {
+		setLoading(true)
+		const nfts = await alchemy.nft.getNftsForOwner(BuildSpaceV2Owner)
+		const filteredNfts = nfts.ownedNfts.filter((nft) => {
+			return nft.contract.address === BuildSpaceV2Address.toLowerCase()
+		})
+		setNfts(filteredNfts)
+		console.log('nfts - buildspace', nfts)
 		setLoading(false)
 	}
 
@@ -84,20 +79,6 @@ const Home: NextPage = () => {
 			loadBuildspaceNfts()
 		}
 	}, [address])
-
-	const friendlyWalletName = (address: String) => {
-		const addressLength = address.length
-		return `${address.substring(0, 5)}...${address.substring(
-			addressLength - 5
-		)}`
-	}
-
-	const isUserOwnNothing = (): boolean => {
-		return (
-			(nfts?.length === 0 || !nfts) &&
-			nftAmountOwnByUser.every((item) => item == 0)
-		)
-	}
 
 	if (loading) {
 		return (
@@ -136,7 +117,7 @@ const Home: NextPage = () => {
 					)}
 				</section>
 				{/* Display nfts user owns */}
-				{isUserOwnNothing() && address ? (
+				{address && isUserOwnNothing(nfts, nftAmountOwnByUser) ? (
 					<div className='text-center p-4 text-3xl text-blue-900 '>
 						You don't own any Build Space V2 or Learn Web3 Dao Nfts
 					</div>
