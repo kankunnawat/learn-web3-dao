@@ -1,19 +1,19 @@
-import { OwnedNft } from 'alchemy-sdk'
+import { NftProps } from '../../../typings'
 import Image from 'next/image'
 
 interface Props {
-	nfts: OwnedNft[] | undefined
+	nfts: NftProps[]
+	title: string
 }
-
-const NftBuildSpace: React.FC<Props> = ({ nfts }) => {
+const NftList: React.FC<Props> = ({ nfts, title }) => {
 	if (!nfts || nfts.length === 0) {
 		return null
 	}
 
 	return (
-		<div className='bg-slate-100 px-10 shadow-xl shadow-rose-400/20'>
+		<div className='bg-slate-100 px-10 py-5 shadow-xl shadow-rose-400/20'>
 			<h1 className='text-3xl font-bold lg:text-5xl lg:font-extrabold pb-10'>
-				Build Space V2 Collection
+				{title}
 			</h1>
 			<div className='grid space-x-3 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4'>
 				{nfts.map((item, index) => {
@@ -22,23 +22,21 @@ const NftBuildSpace: React.FC<Props> = ({ nfts }) => {
 							key={index}
 							className='flex cursor-pointer flex-col items-center transition-all duration-200 hover:scale-105'
 						>
-							{item.rawMetadata?.image && (
+							{item.image && (
 								<Image
 									className='object-cover rounded-2xl'
-									src={item.rawMetadata?.image}
+									src={item.image}
 									alt='nft'
 									width={280}
 									height={350}
 								/>
 							)}
 							<div className='p-5'>
-								<h2 className='text-3xl'>{item.rawMetadata?.name}</h2>
+								<h2 className='text-3xl'>{item.name}</h2>
 								<h3 className='pt-2 text-lg text-gray-700'>
-									Amount: {item.balance}
+									Amount: {item.amount}
 								</h3>
-								<p className='mt-2 text-sm text-gray-400'>
-									{item.rawMetadata?.description}
-								</p>
+								<p className='mt-2 text-sm text-gray-400'>{item.description}</p>
 							</div>
 						</section>
 					)
@@ -48,4 +46,4 @@ const NftBuildSpace: React.FC<Props> = ({ nfts }) => {
 	)
 }
 
-export default NftBuildSpace
+export default NftList
