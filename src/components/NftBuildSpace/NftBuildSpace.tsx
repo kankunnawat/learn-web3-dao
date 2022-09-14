@@ -1,4 +1,4 @@
-import { useEffect, useState, CSSProperties } from 'react'
+import { CSSProperties } from 'react'
 import { OwnedNft } from 'alchemy-sdk'
 import HashLoader from 'react-spinners/HashLoader'
 import Image from 'next/image'
@@ -13,9 +13,8 @@ const loaderCss: CSSProperties = {
 }
 
 const NftBuildSpace: React.FC<Props> = ({ nfts }) => {
-	console.log('nft buildspace own', nfts)
 	if (!nfts || nfts.length === 0) {
-		return <div>You don't own any Buildspace nft</div>
+		return null
 	}
 
 	return (

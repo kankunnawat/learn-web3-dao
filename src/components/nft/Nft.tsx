@@ -41,7 +41,7 @@ const Nft: React.FC<Props> = ({ nftAmountOwnByUser }) => {
 	}, [nftAmountOwnByUser])
 
 	if (isEmpty || nftAmountOwnByUser.length === 0) {
-		return <div>You don't own any LearnWeb3Dao nfts</div>
+		return null
 	}
 
 	return (

@@ -47,7 +47,7 @@ const Home: NextPage = () => {
 	// Alchemy approach for fetching Nfts data from BuildSpaceV2 collection
 	const loadBuildspaceNfts = async () => {
 		if (address) {
-			const nfts = await alchemy.nft.getNftsForOwner(BuildSpaceV2Owner)
+			const nfts = await alchemy.nft.getNftsForOwner(address)
 
 			const filteredNfts = nfts.ownedNfts.filter((nft) => {
 				return nft.contract.address === BuildSpaceV2Address.toLowerCase()
@@ -68,7 +68,7 @@ const Home: NextPage = () => {
 		)
 		const ownerLists = await learnWeb3Contract.methods
 			.balanceOfBatch(
-				Array(totalItemsLearnWeb3NFTs).fill(LearnWeb3DaoOwner),
+				Array(totalItemsLearnWeb3NFTs).fill(address),
 				[0, 1, 2, 3]
 			)
 			.call()
@@ -90,17 +90,24 @@ const Home: NextPage = () => {
 		)}`
 	}
 
+	const isUserOwnNothing = (): boolean => {
+		return (
+			(nfts?.length === 0 || !nfts) &&
+			nftAmountOwnByUser.every((item) => item == 0)
+		)
+	}
+
 	return (
 		<div className='mx-auto flex min-h-screen max-w-7xl flex-col py-20 px-10 2xl:px-0'>
 			<Head>
-				<title>Assignment Kan - LearnWeb3 Dao</title>
+				<title>Assignment - LearnWeb3 Dao</title>
 				<link rel='icon' href='/logo.jpeg' />
 			</Head>
 			<main>
 				<h1 className='mb-10 text-4xl font-extralight text-center '>
-					Learn
+					Learn{' '}
 					<span className='font-extrabold underline decoration-blue-900 hover:decoration-blue-400'>
-						Web3
+						Web3{' '}
 					</span>
 					Dao Assignment
 				</h1>
@@ -119,10 +126,16 @@ const Home: NextPage = () => {
 					)}
 				</section>
 				{/* Display nfts user owns */}
-				<section>
-					{address && <Nft nftAmountOwnByUser={nftAmountOwnByUser} />}
-					{address && <NftBuildSpace nfts={nfts} />}
-				</section>
+				{isUserOwnNothing() && address ? (
+					<div className='text-center p-4 text-3xl text-blue-900 '>
+						You don't own any Build Space V2 or Learn Web3 Dao Nfts
+					</div>
+				) : (
+					<section>
+						{address && <Nft nftAmountOwnByUser={nftAmountOwnByUser} />}
+						{address && <NftBuildSpace nfts={nfts} />}
+					</section>
+				)}
 			</main>
 		</div>
 	)
