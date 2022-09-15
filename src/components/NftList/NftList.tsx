@@ -7,12 +7,7 @@ interface Props {
 }
 const NftList: React.FC<Props> = ({ nfts, title }) => {
 	if (!nfts || nfts.length === 0) {
-		return (
-			// <div className='text-center p-4 text-3xl text-blue-900'>
-			// 	You don't own any nft in {title}
-			// </div>
-			null
-		)
+		return null
 	}
 
 	return (

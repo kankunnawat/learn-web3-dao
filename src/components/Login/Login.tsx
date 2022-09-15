@@ -14,7 +14,7 @@ interface Props {
 
 const Login: React.FC<Props> = ({ connectWithMetamask }) => {
 	return (
-		<div className='mx-auto flex min-h-screen max-w-7xl flex-col py-20 px-10 2xl:px-0'>
+		<div className='mx-auto flex min-h-screen max-w-7xl flex-col justify-center items-center'>
 			<h1 className='mb-10 text-4xl font-extralight text-center'>
 				Learn{' '}
 				<span className='font-extrabold underline decoration-blue-900 hover:decoration-blue-400'>
