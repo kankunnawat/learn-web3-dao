@@ -11,7 +11,7 @@ import NftList from 'components/NftList'
 import Login from 'components/Login'
 import OwnNothing from 'components/OwnNothing'
 import HashLoader from 'react-spinners/HashLoader'
-import { NftProps, RawNftMetadata } from '../../typings'
+import { NftProps } from '../../typings'
 
 // Thirdweb
 import { useAddress, useDisconnect, useMetamask } from '@thirdweb-dev/react'
@@ -25,12 +25,11 @@ import { BuildSpaceV2Owner } from '../constants/address'
 // Getting an abi through require to fix typescript issue with web3js
 const LearnWeb3DaoABI = require('../abi/learn_web3_dao_abi.json')
 
-import learnWeb3NFTsData from '../constants/learnWeb3Data'
 import { friendlyWalletName } from '../utlis'
 
 const Home: NextPage = () => {
 	const [loading, setLoading] = useState<boolean>(false)
-	const totalItemsLearnWeb3NFTs = 4 // learnWeb3Dao nft collection has only 4 items
+	const totalItemsLearnWeb3NFTs = 4 // learnWeb3Dao nft collection has only 4 items on opensea
 
 	// Auth with thirdweb
 	const connectWithMetamask = useMetamask()
@@ -55,25 +54,44 @@ const Home: NextPage = () => {
 			setLoading(true)
 			const ownerLists = await learnWeb3Contract.methods
 				.balanceOfBatch(
-					Array(totalItemsLearnWeb3NFTs).fill(LearnWeb3DaoOwner),
+					Array(totalItemsLearnWeb3NFTs).fill(address),
 					[0, 1, 2, 3]
 				)
 				.call()
 
-			let values: RawNftMetadata[] = []
-			Object.values(learnWeb3NFTsData).map((value) => {
-				values.push(value)
-			})
+			// Call smart contract methods
+			const baseURI = await learnWeb3Contract.methods.baseURI().call()
+			let tokenMetadataURI = ''
+			let tokenMetadataURIList: string[] = []
+			for (let i = 0; i < totalItemsLearnWeb3NFTs; i++) {
+				tokenMetadataURI = `https://cloudflare-ipfs.com/ipfs/${
+					baseURI.split('ipfs://')[1]
+				}/${i}.json`
+				tokenMetadataURIList.push(tokenMetadataURI)
+			}
+			try {
+				let res = await Promise.all(tokenMetadataURIList.map((e) => fetch(e)))
+				let resJson = await Promise.all(res.map((e) => e.json()))
 
-			let learnWeb3Nfts: NftProps[] = []
-			learnWeb3Nfts = values.map((item, index) => ({
-				...item,
-				amount: ownerLists[index],
-			}))
-			if (learnWeb3Nfts.every((item) => item.amount === '0')) {
-				setlearnWeb3Nfts([])
-			} else {
-				setlearnWeb3Nfts(learnWeb3Nfts)
+				let learnWeb3Nfts: NftProps[] = resJson.map((item, index) => {
+					const image = `https://cloudflare-ipfs.com/ipfs/${
+						resJson[index].image.split('ipfs://')[1]
+					}`
+					return {
+						name: item.name,
+						description: item.description,
+						image: image,
+						amount: ownerLists[index],
+					}
+				})
+
+				if (learnWeb3Nfts.every((item) => item.amount === '0')) {
+					setlearnWeb3Nfts([])
+				} else {
+					setlearnWeb3Nfts(learnWeb3Nfts)
+				}
+			} catch (err) {
+				console.log(err)
 			}
 		} catch (error) {
 			console.log(error)
@@ -87,7 +105,7 @@ const Home: NextPage = () => {
 
 		try {
 			setLoading(true)
-			const nfts = await alchemy.nft.getNftsForOwner(BuildSpaceV2Owner)
+			const nfts = await alchemy.nft.getNftsForOwner(address)
 			const filteredNfts = nfts.ownedNfts.filter((nft) => {
 				return nft.contract.address === BuildSpaceV2Address.toLowerCase()
 			})
