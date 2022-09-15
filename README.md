@@ -1,8 +1,8 @@
-# Next.js + Tailwind CSS Powered by Alchemy, Thirdweb, and Web3js
+# Next.js + Tailwind CSS Powered with Alchemy, Thirdweb, and Web3js
 Demo 👉 [https://learn-web3-dao-assignment-kan.vercel.app/](https://learn-web3-dao-assignment-kan.vercel.app/)
 
 
-Setup
+## Setup
 Get the code by either cloning this repository using git
 
 ```
@@ -21,3 +21,5 @@ Then start the example app with:
 ```
 npm run dev
 ```
+
+The app should now be up and running at http://localhost:3000 🚀
