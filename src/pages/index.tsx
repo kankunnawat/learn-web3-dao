@@ -28,7 +28,10 @@ const LearnWeb3DaoABI = require('../abi/learn_web3_dao_abi.json')
 import { friendlyWalletName } from '../utlis'
 
 const Home: NextPage = () => {
-	const [loading, setLoading] = useState<boolean>(false)
+	const [isLearnWeb3DaoLoading, setIsLearnWeb3DaoLoading] =
+		useState<boolean>(false)
+	const [isBuildSpaceLoading, setIsBuildSpaceLoading] = useState<boolean>(false)
+
 	const totalItemsLearnWeb3NFTs = 4 // learnWeb3Dao nft collection has only 4 items on opensea
 
 	// Auth with thirdweb
@@ -51,7 +54,7 @@ const Home: NextPage = () => {
 			LearnWeb3DaoAddress
 		)
 		try {
-			setLoading(true)
+			setIsLearnWeb3DaoLoading(true)
 			const ownerLists = await learnWeb3Contract.methods
 				.balanceOfBatch(
 					Array(totalItemsLearnWeb3NFTs).fill(address),
@@ -59,7 +62,6 @@ const Home: NextPage = () => {
 				)
 				.call()
 
-			// Call smart contract methods
 			const baseURI = await learnWeb3Contract.methods.baseURI().call()
 			let tokenMetadataURI = ''
 			let tokenMetadataURIList: string[] = []
@@ -96,7 +98,7 @@ const Home: NextPage = () => {
 		} catch (error) {
 			console.log(error)
 		}
-		setLoading(false)
+		setIsLearnWeb3DaoLoading(false)
 	}
 
 	// Alchemy approach for fetching Nfts data from BuildSpaceV2 collection
@@ -104,7 +106,7 @@ const Home: NextPage = () => {
 		if (!address) return
 
 		try {
-			setLoading(true)
+			setIsBuildSpaceLoading(true)
 			const nfts = await alchemy.nft.getNftsForOwner(address)
 			const filteredNfts = nfts.ownedNfts.filter((nft) => {
 				return nft.contract.address === BuildSpaceV2Address.toLowerCase()
@@ -121,8 +123,7 @@ const Home: NextPage = () => {
 		} catch (error) {
 			console.log(error)
 		}
-
-		setLoading(false)
+		setIsBuildSpaceLoading(false)
 	}
 
 	const checkIsUserOwnNothing = () => {
@@ -141,7 +142,7 @@ const Home: NextPage = () => {
 		return <Login connectWithMetamask={connectWithMetamask} />
 	}
 
-	if (loading) {
+	if (isLearnWeb3DaoLoading || isBuildSpaceLoading) {
 		return (
 			<div className='flex h-screen items-center justify-center'>
 				<HashLoader size={150} />
