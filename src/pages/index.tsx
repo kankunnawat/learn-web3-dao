@@ -9,9 +9,6 @@ import Login from 'components/Login'
 import OwnNothing from 'components/OwnNothing'
 import HashLoader from 'react-spinners/HashLoader'
 import { NftProps } from '../../typings'
-//Test Account Address
-import { LearnWeb3DaoOwner } from '../constants/address'
-import { BuildSpaceV2Owner } from '../constants/address'
 //Helper Functions
 import { friendlyWalletName } from '../helperFunctions/utlis'
 import { getLearnWeb3Nfts } from '../helperFunctions/getLearnWeb3Nfts'
