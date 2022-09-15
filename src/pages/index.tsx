@@ -138,7 +138,7 @@ const Home: NextPage = () => {
 				<link rel='icon' href='/logo.jpeg' />
 			</Head>
 			<main>
-				<h1 className='mb-10 text-4xl font-extralight text-center '>
+				<h1 className='mb-5 text-4xl font-extralight text-center md:mb-10'>
 					This is all{' '}
 					<span className='font-extrabold underline decoration-blue-900 hover:decoration-blue-400'>
 						Nfts{' '}
@@ -147,7 +147,7 @@ const Home: NextPage = () => {
 				</h1>
 				<section className='text-center'>
 					<button
-						className='bg-transparent hover:bg-blue-500 hover:scale-110 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded transition-all ease-in-out delay-10 mb-5'
+						className='bg-transparent hover:bg-red-500 hover:scale-110 text-red-400 font-semibold hover:text-white py-2 px-4 border border-red-500 hover:border-transparent rounded transition-all ease-in-out delay-10 mb-5'
 						onClick={() => disconnect()}
 					>
 						Sign out
