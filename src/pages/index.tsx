@@ -145,17 +145,17 @@ const Home: NextPage = () => {
 					</span>
 					You own
 				</h1>
-				<section className='text-center'>
+				<div className='text-center'>
+					<h3 className='m-2 text-xl text-blue-400 pb-4'>
+						Wallet Address: {friendlyWalletName(address)}
+					</h3>
 					<button
 						className='bg-transparent hover:bg-red-500 hover:scale-110 text-red-400 font-semibold hover:text-white py-2 px-4 border border-red-500 hover:border-transparent rounded transition-all ease-in-out delay-10 mb-5'
 						onClick={() => disconnect()}
 					>
 						Sign out
 					</button>
-					<h3 className='m-2 text-sm text-blue-400'>
-						Wallet Address: {friendlyWalletName(address)}
-					</h3>
-				</section>
+				</div>
 				{checkIsUserOwnNothing() ? (
 					<OwnNothing />
 				) : (

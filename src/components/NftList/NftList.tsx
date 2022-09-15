@@ -11,7 +11,7 @@ const NftList: React.FC<Props> = ({ nfts, title }) => {
 	}
 
 	return (
-		<div className='bg-slate-100 px-10 py-5 shadow-xl shadow-rose-400/20'>
+		<div className='bg-slate-100 px-10 py-5 shadow-xl shadow-rose-400/20 rounded-2xl'>
 			<h1 className='text-3xl font-bold lg:text-5xl lg:font-extrabold pb-10'>
 				{title}
 			</h1>
