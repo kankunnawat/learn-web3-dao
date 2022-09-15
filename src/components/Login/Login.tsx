@@ -18,8 +18,8 @@ const Login: React.FC<Props> = ({ connectWithMetamask }) => {
 			<h1 className='mb-10 text-4xl font-extralight text-center'>
 				Learn{' '}
 				<span className='font-extrabold underline decoration-blue-900 hover:decoration-blue-400'>
-					Web3{' '}
-				</span>
+					Web3
+				</span>{' '}
 				Dao Assignment
 			</h1>
 			<h1 className='mb-5 text-4xl font-extralight text-center'>
