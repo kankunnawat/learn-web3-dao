@@ -55,7 +55,7 @@ const Home: NextPage = () => {
 			setLoading(true)
 			const ownerLists = await learnWeb3Contract.methods
 				.balanceOfBatch(
-					Array(totalItemsLearnWeb3NFTs).fill(address),
+					Array(totalItemsLearnWeb3NFTs).fill(LearnWeb3DaoOwner),
 					[0, 1, 2, 3]
 				)
 				.call()
