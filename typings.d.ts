@@ -1,7 +1,7 @@
 export interface NftProps {
 	name?: string
 	image?: string
-	amount: number
+	amount: string
 	description?: string
 }
 

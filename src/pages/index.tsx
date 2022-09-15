@@ -9,6 +9,7 @@ import { alchemyConfig } from '../../alchemy'
 // Components
 import NftList from 'components/NftList'
 import Login from 'components/Login'
+import OwnNothing from 'components/OwnNothing'
 import HashLoader from 'react-spinners/HashLoader'
 import { NftProps, RawNftMetadata } from '../../typings'
 
@@ -25,7 +26,7 @@ import { BuildSpaceV2Owner } from '../constants/address'
 const LearnWeb3DaoABI = require('../abi/learn_web3_dao_abi.json')
 
 import learnWeb3NFTsData from '../constants/learnWeb3Data'
-import { friendlyWalletName, userOwnNothing } from '../utlis'
+import { friendlyWalletName } from '../utlis'
 
 const Home: NextPage = () => {
 	const [loading, setLoading] = useState<boolean>(false)
@@ -43,63 +44,79 @@ const Home: NextPage = () => {
 
 	// Native Approach to get Nfts data from LearnWeb3Dao collection
 	const loadLearnWeb3DaoNFTs = async () => {
+		if (!address) return
+
 		const web3 = new Web3(window.ethereum)
 		const learnWeb3Contract = new web3.eth.Contract(
 			LearnWeb3DaoABI,
 			LearnWeb3DaoAddress
 		)
-		setLoading(true)
-		const ownerLists = await learnWeb3Contract.methods
-			.balanceOfBatch(
-				Array(totalItemsLearnWeb3NFTs).fill(address),
-				[0, 1, 2, 3]
-			)
-			.call()
+		try {
+			setLoading(true)
+			const ownerLists = await learnWeb3Contract.methods
+				.balanceOfBatch(
+					Array(totalItemsLearnWeb3NFTs).fill(address),
+					[0, 1, 2, 3]
+				)
+				.call()
 
-		let values: RawNftMetadata[] = []
-		Object.values(learnWeb3NFTsData).map((value) => {
-			values.push(value)
-		})
+			let values: RawNftMetadata[] = []
+			Object.values(learnWeb3NFTsData).map((value) => {
+				values.push(value)
+			})
 
-		let learnWeb3Nfts: NftProps[] = []
-		learnWeb3Nfts = values.map((item, index) => ({
-			...item,
-			amount: ownerLists[index],
-		}))
-		setlearnWeb3Nfts(learnWeb3Nfts)
-
+			let learnWeb3Nfts: NftProps[] = []
+			learnWeb3Nfts = values.map((item, index) => ({
+				...item,
+				amount: ownerLists[index],
+			}))
+			if (learnWeb3Nfts.every((item) => item.amount === '0')) {
+				setlearnWeb3Nfts([])
+			} else {
+				setlearnWeb3Nfts(learnWeb3Nfts)
+			}
+		} catch (error) {
+			console.log(error)
+		}
 		setLoading(false)
 	}
 
 	// Alchemy approach for fetching Nfts data from BuildSpaceV2 collection
 	const loadBuildspaceNfts = async () => {
-		setLoading(true)
-		if (!address) {
-			return
+		if (!address) return
+
+		try {
+			setLoading(true)
+			const nfts = await alchemy.nft.getNftsForOwner(BuildSpaceV2Owner)
+			const filteredNfts = nfts.ownedNfts.filter((nft) => {
+				return nft.contract.address === BuildSpaceV2Address.toLowerCase()
+			})
+
+			let buildspaceNfts: NftProps[] = []
+			buildspaceNfts = filteredNfts.map((item) => ({
+				name: item.rawMetadata?.name,
+				image: item.rawMetadata?.image,
+				amount: item.balance.toString(),
+				description: item.rawMetadata?.description,
+			}))
+			setBuildspaceNfts(buildspaceNfts)
+		} catch (error) {
+			console.log(error)
 		}
 
-		const nfts = await alchemy.nft.getNftsForOwner(address)
-		const filteredNfts = nfts.ownedNfts.filter((nft) => {
-			return nft.contract.address === BuildSpaceV2Address.toLowerCase()
-		})
-
-		let buildspaceNfts: NftProps[] = []
-		buildspaceNfts = filteredNfts.map((item) => ({
-			name: item.rawMetadata?.name,
-			image: item.rawMetadata?.image,
-			amount: item.balance,
-			description: item.rawMetadata?.description,
-		}))
-		setBuildspaceNfts(buildspaceNfts)
 		setLoading(false)
+	}
+
+	const checkIsUserOwnNothing = () => {
+		return buildspaceNfts.length === 0 && learnWeb3Nfts.length === 0
 	}
 
 	// Load nft when log in
 	useEffect(() => {
-		if (address) {
-			loadLearnWeb3DaoNFTs()
-			loadBuildspaceNfts()
-		}
+		if (!address) return
+
+		loadLearnWeb3DaoNFTs()
+		loadBuildspaceNfts()
 	}, [address])
 
 	if (!address) {
@@ -139,17 +156,13 @@ const Home: NextPage = () => {
 						Wallet Address: {friendlyWalletName(address)}
 					</h3>
 				</section>
-				{/* Display nfts user owns */}
-
-				{!userOwnNothing(buildspaceNfts, learnWeb3Nfts) ? (
-					<div className='text-center p-4 text-3xl text-blue-900'>
-						You don't own any Build Space V2 or Learn Web3 Dao Nfts
-					</div>
+				{checkIsUserOwnNothing() ? (
+					<OwnNothing />
 				) : (
-					<section>
+					<>
 						<NftList nfts={learnWeb3Nfts} title='Learn Web3 Dao Collection' />
 						<NftList nfts={buildspaceNfts} title='Build Space V2 Collection' />
-					</section>
+					</>
 				)}
 			</main>
 		</div>
