@@ -1,148 +1,56 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-
 import { useState, useEffect } from 'react'
-import Web3 from 'web3'
-import { Alchemy } from 'alchemy-sdk'
-import { alchemyConfig } from '../../alchemy'
-
+// Thirdweb
+import { useAddress, useDisconnect, useMetamask } from '@thirdweb-dev/react'
 // Components
 import NftList from 'components/NftList'
 import Login from 'components/Login'
 import OwnNothing from 'components/OwnNothing'
 import HashLoader from 'react-spinners/HashLoader'
 import { NftProps } from '../../typings'
-
-// Thirdweb
-import { useAddress, useDisconnect, useMetamask } from '@thirdweb-dev/react'
-
-// Contract Address
-import { LearnWeb3DaoAddress } from '../constants/address'
-import { BuildSpaceV2Address } from '../constants/address'
 //Test Account Address
 import { LearnWeb3DaoOwner } from '../constants/address'
 import { BuildSpaceV2Owner } from '../constants/address'
-// Getting an abi through require to fix typescript issue with web3js
-const LearnWeb3DaoABI = require('../abi/learn_web3_dao_abi.json')
-
-import { friendlyWalletName } from '../utlis'
+//Helper Functions
+import { friendlyWalletName } from '../helperFunctions/utlis'
+import { getLearnWeb3Nfts } from '../helperFunctions/getLearnWeb3Nfts'
+import { getBuildspaceNfts } from '../helperFunctions/getBuildSpaceNfts'
 
 const Home: NextPage = () => {
-	const [isLearnWeb3DaoLoading, setIsLearnWeb3DaoLoading] =
-		useState<boolean>(false)
-	const [isBuildSpaceLoading, setIsBuildSpaceLoading] = useState<boolean>(false)
-
-	const totalItemsLearnWeb3NFTs = 4 // learnWeb3Dao nft collection has only 4 items on opensea
+	const [loading, setLoading] = useState<boolean>(false)
 
 	// Auth with thirdweb
 	const connectWithMetamask = useMetamask()
 	const address = useAddress()
 	const disconnect = useDisconnect()
-	// Alchemy
-	const alchemy = new Alchemy(alchemyConfig)
 
 	const [buildspaceNfts, setBuildspaceNfts] = useState<NftProps[]>([])
 	const [learnWeb3Nfts, setlearnWeb3Nfts] = useState<NftProps[]>([])
-
-	// Native Approach to get Nfts data from LearnWeb3Dao collection
-	const loadLearnWeb3DaoNFTs = async () => {
-		if (!address) return
-
-		const web3 = new Web3(window.ethereum)
-		const learnWeb3Contract = new web3.eth.Contract(
-			LearnWeb3DaoABI,
-			LearnWeb3DaoAddress
-		)
-		try {
-			setIsLearnWeb3DaoLoading(true)
-			const ownerLists = await learnWeb3Contract.methods
-				.balanceOfBatch(
-					Array(totalItemsLearnWeb3NFTs).fill(address),
-					[0, 1, 2, 3]
-				)
-				.call()
-
-			const baseURI = await learnWeb3Contract.methods.baseURI().call()
-			let tokenMetadataURI = ''
-			let tokenMetadataURIList: string[] = []
-			for (let i = 0; i < totalItemsLearnWeb3NFTs; i++) {
-				tokenMetadataURI = `https://cloudflare-ipfs.com/ipfs/${
-					baseURI.split('ipfs://')[1]
-				}/${i}.json`
-				tokenMetadataURIList.push(tokenMetadataURI)
-			}
-			try {
-				let res = await Promise.all(tokenMetadataURIList.map((e) => fetch(e)))
-				let resJson = await Promise.all(res.map((e) => e.json()))
-
-				let learnWeb3Nfts: NftProps[] = resJson.map((item, index) => {
-					const image = `https://cloudflare-ipfs.com/ipfs/${
-						resJson[index].image.split('ipfs://')[1]
-					}`
-					return {
-						name: item.name,
-						description: item.description,
-						image: image,
-						amount: ownerLists[index],
-					}
-				})
-
-				if (learnWeb3Nfts.every((item) => item.amount === '0')) {
-					setlearnWeb3Nfts([])
-				} else {
-					setlearnWeb3Nfts(learnWeb3Nfts)
-				}
-			} catch (err) {
-				console.log(err)
-			}
-		} catch (error) {
-			console.log(error)
-		}
-		setIsLearnWeb3DaoLoading(false)
-	}
-
-	// Alchemy approach for fetching Nfts data from BuildSpaceV2 collection
-	const loadBuildspaceNfts = async () => {
-		if (!address) return
-
-		try {
-			setIsBuildSpaceLoading(true)
-			const nfts = await alchemy.nft.getNftsForOwner(address)
-			const filteredNfts = nfts.ownedNfts.filter((nft) => {
-				return nft.contract.address === BuildSpaceV2Address.toLowerCase()
-			})
-
-			let buildspaceNfts: NftProps[] = []
-			buildspaceNfts = filteredNfts.map((item) => ({
-				name: item.rawMetadata?.name,
-				image: item.rawMetadata?.image,
-				amount: item.balance.toString(),
-				description: item.rawMetadata?.description,
-			}))
-			setBuildspaceNfts(buildspaceNfts)
-		} catch (error) {
-			console.log(error)
-		}
-		setIsBuildSpaceLoading(false)
-	}
 
 	const checkIsUserOwnNothing = () => {
 		return buildspaceNfts.length === 0 && learnWeb3Nfts.length === 0
 	}
 
-	// Load nft when log in
+	// Load Nfts when log in
 	useEffect(() => {
 		if (!address) return
 
-		loadLearnWeb3DaoNFTs()
-		loadBuildspaceNfts()
+		setLoading(true)
+		Promise.all([getLearnWeb3Nfts(address), getBuildspaceNfts(address)]).then(
+			(arr) => {
+				setlearnWeb3Nfts(arr[0])
+				setBuildspaceNfts(arr[1])
+				setLoading(false)
+			}
+		)
 	}, [address])
 
 	if (!address) {
 		return <Login connectWithMetamask={connectWithMetamask} />
 	}
 
-	if (isLearnWeb3DaoLoading || isBuildSpaceLoading) {
+	if (loading) {
 		return (
 			<div className='flex h-screen items-center justify-center'>
 				<HashLoader size={150} />
